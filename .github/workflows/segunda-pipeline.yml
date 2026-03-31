@@ -85,7 +85,7 @@ jobs:
     secrets:
       RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
 
-  deploy-homolog:
+  deploy-prod:
     uses: ./.github/workflows/deploy-prod-segunda-pipeline.yml
     needs: release
     secrets:
