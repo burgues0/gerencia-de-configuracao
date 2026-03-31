@@ -21,7 +21,9 @@ jobs:
           node-version: '20'
 
   workflow-testes:
-    uses: ./.github/workflows/testes.yml
+    uses: ./.github/workflows/segunda-pipeline.yml
+    needs: build
+
 
   release:
     name: Criação de Release
