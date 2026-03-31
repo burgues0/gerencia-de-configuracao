@@ -2,6 +2,9 @@ name: Deploy Produção
 
 on:
   workflow_call:
+      secrets:
+        RENDER_DEPLOY_HOOK:
+          required: true
 
 jobs:
   deploy-prod:
