@@ -98,7 +98,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/build-push-action@v4
         with:
-          context: APIs para exercícios/api-go
+          context: "APIs para exercícios/api-go"
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/api-go:latest

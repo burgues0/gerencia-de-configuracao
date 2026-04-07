@@ -40,7 +40,7 @@ jobs:
       
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && hashFiles('semgrep.sarif') != ''
         with:
           sarif_file: semgrep.sarif
           category: semgrep
@@ -62,5 +62,5 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ inputs.sonar_project_key }}
             -Dsonar.organization=${{ inputs.sonar_organization }}
-            -Dsonar.sources=${{ inputs.api_path }}
-            -Dsonar.exclusions=${{ inputs.api_path }}/vendor/**
+            -Dsonar.sources="${{ inputs.api_path }}"
+            -Dsonar.exclusions="${{ inputs.api_path }}/vendor/**"

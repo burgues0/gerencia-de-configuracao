@@ -55,7 +55,7 @@ jobs:
       - name: Docker Lint
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: APIs para exercícios/api-js/Dockerfile
+          dockerfile: "APIs para exercícios/api-js/Dockerfile"
           ignore: DL3008,DL3009
 
       - name: Set up Docker Buildx
@@ -64,7 +64,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: APIs para exercícios/api-js
+          context: "APIs para exercícios/api-js"
           push: false
           load: true
           tags: api-js:${{ github.sha }}
@@ -97,7 +97,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: docker/build-push-action@v4
         with:
-          context: APIs para exercícios/api-js
+          context: "APIs para exercícios/api-js"
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/api-js:latest
