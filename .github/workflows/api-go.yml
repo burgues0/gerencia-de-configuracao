@@ -28,7 +28,7 @@ jobs:
       - name: Lint with golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          working-directory: APIs para exercícios/api-go
+          working-directory: "APIs para exercícios/api-go"
           version: latest
 
   code-quality:
@@ -54,7 +54,7 @@ jobs:
       - name: Docker Lint
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: APIs para exercícios/api-go/Dockerfile
+          dockerfile: "APIs para exercícios/api-go/Dockerfile"
           ignore: DL3008,DL3009
 
       - name: Set up Docker Buildx
@@ -63,7 +63,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: APIs para exercícios/api-go
+          context: "APIs para exercícios/api-go"
           push: false
           load: true
           tags: api-go:${{ github.sha }}
