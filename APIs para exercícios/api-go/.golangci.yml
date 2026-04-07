@@ -1,0 +1,19 @@
+linters:
+  enable:
+    - errcheck
+    - golint
+    - govet
+    - ineffassign
+    - lll
+    - misspell
+    - staticcheck
+
+linters-settings:
+  errcheck:
+    check-type-assertions: false
+    check-blank: false
+  lll:
+    line-length: 120
+
+output:
+  format: colored-line-number
