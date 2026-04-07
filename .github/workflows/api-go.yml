@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "APIs para exercícios/api-go"
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -17,18 +20,19 @@ jobs:
           go-version: '1.20'
 
       - name: Build application
-        run: cd "APIs para exercícios/api-go" && go build -v
+        run: go build -v
 
       - name: Run unit tests
-        run: cd "APIs para exercícios/api-go" && go test -v ./...
+        run: go test -v ./...
 
       - name: Run integration tests
-        run: cd "APIs para exercícios/api-go" && go test -v -tags=integration ./...
+        run: go test -v -tags=integration ./...
       
       - name: Lint with golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           working-directory: "APIs para exercícios/api-go"
+          args: --path-prefix=.
           version: latest
 
   code-quality:

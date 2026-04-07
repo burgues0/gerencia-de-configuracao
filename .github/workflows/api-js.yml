@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "APIs para exercícios/api-js"
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -17,17 +20,17 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: cd "APIs para exercícios/api-js" && npm install
+        run: npm install
 
       - name: Lint
-        run: cd "APIs para exercícios/api-js" && npm run lint --if-present
+        run: npm run lint --if-present
 
       - name: Run unit tests
-        run: cd "APIs para exercícios/api-js" && npm test
+        run: npm test
         continue-on-error: true
 
       - name: Build application
-        run: cd "APIs para exercícios/api-js" && npm run build --if-present
+        run: npm run build --if-present
 
   code-quality:
     needs: build
