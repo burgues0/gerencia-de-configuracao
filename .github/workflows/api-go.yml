@@ -32,7 +32,6 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           working-directory: "APIs para exercícios/api-go"
-          args: --timeout=5m
           version: latest
 
   code-quality:

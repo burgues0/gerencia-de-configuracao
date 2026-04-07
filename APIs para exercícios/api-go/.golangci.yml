@@ -1,7 +1,7 @@
 linters:
   enable:
     - errcheck
-    - golint
+    - revive
     - govet
     - ineffassign
     - lll
@@ -16,4 +16,5 @@ linters-settings:
     line-length: 120
 
 output:
-  format: colored-line-number
+  formats:
+    - colored-line-number
