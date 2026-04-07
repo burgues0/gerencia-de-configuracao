@@ -36,7 +36,9 @@ func (c *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-fif err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+func (c *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var u User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -45,11 +47,14 @@ fif err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(created); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}(u)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(created)
+	}
 }
-if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+
+func (c *UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	id := extractID(r.URL.Path)
+
+	var u User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -63,11 +68,6 @@ if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 	if err := json.NewEncoder(w).Encode(updated); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	json.NewEncoder(w).Encode(updated)
 }
 
 func (c *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
