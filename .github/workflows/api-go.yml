@@ -38,7 +38,7 @@ jobs:
       api_path: "APIs para exercícios/api-go"
       language: "go"
       sonar_project_key: "api-go"
-      sonar_organization: ${{ secrets.SONAR_ORGANIZATION }}
+      sonar_organization: "burguesia"
     secrets: inherit
 
   container:

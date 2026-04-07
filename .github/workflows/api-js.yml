@@ -35,7 +35,7 @@ jobs:
       api_path: "APIs para exercícios/api-js"
       language: "javascript"
       sonar_project_key: "api-js"
-      sonar_organization: ${{ secrets.SONAR_ORGANIZATION }}
+      sonar_organization: "burguesia"
     secrets: inherit
 
   container:
