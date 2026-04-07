@@ -1,0 +1,63 @@
+name: code-scan
+on:
+  workflow_call:
+    inputs:
+      api_path:
+        required: true
+        type: string
+        description: 'Path to the API (e.g., APIs para exercícios/api-go)'
+      language:
+        required: true
+        type: string
+        description: 'Programming language (go or javascript)'
+      sonar_project_key:
+        required: true
+        type: string
+        description: 'SonarCloud project key'
+      sonar_organization:
+        required: true
+        type: string
+        description: 'SonarCloud organization key'
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    name: Semgrep SAST
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run Semgrep scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          generateSarif: true
+          config: >-
+            p/security-audit
+            p/owasp-top-ten
+            p/cwe-top-25
+          path: ${{ inputs.api_path }}
+      
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+
+  sonarcloud:
+    runs-on: ubuntu-latest
+    name: SonarCloud Quality Gate
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ inputs.sonar_project_key }}
+            -Dsonar.organization=${{ inputs.sonar_organization }}
+            -Dsonar.sources=${{ inputs.api_path }}
+            -Dsonar.exclusions=${{ inputs.api_path }}/vendor/**

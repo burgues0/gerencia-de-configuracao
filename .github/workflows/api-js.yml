@@ -1,0 +1,102 @@
+name: build-api-js
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: cd "APIs para exercícios/api-js" && npm install
+
+      - name: Lint
+        run: cd "APIs para exercícios/api-js" && npm run lint --if-present
+
+      - name: Run unit tests
+        run: cd "APIs para exercícios/api-js" && npm test --if-present
+
+      - name: Build application
+        run: cd "APIs para exercícios/api-js" && npm run build --if-present
+
+  code-quality:
+    needs: build
+    uses: ./.github/workflows/code-scan.yml
+    with:
+      api_path: "APIs para exercícios/api-js"
+      language: "javascript"
+      sonar_project_key: "api-js"
+      sonar_organization: ${{ secrets.SONAR_ORGANIZATION }}
+    secrets: inherit
+
+  container:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Docker Lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: APIs para exercícios/api-js/Dockerfile
+          ignore: DL3008,DL3009
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: APIs para exercícios/api-js
+          push: false
+          load: true
+          tags: api-js:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: api-js:${{ github.sha }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-api-js
+
+      - name: Login to DockerHub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to DockerHub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v4
+        with:
+          context: APIs para exercícios/api-js
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/api-js:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/api-js:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

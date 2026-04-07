@@ -1,0 +1,20 @@
+name: deploy-api-js
+on:
+  workflow_run:
+    workflows: ["build-api-js"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Deploy API JavaScript
+        run: |
+          echo "todo"

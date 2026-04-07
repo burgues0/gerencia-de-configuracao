@@ -1,0 +1,105 @@
+name: build-api-go
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Build application
+        run: cd "APIs para exercícios/api-go" && go build -v
+
+      - name: Run unit tests
+        run: cd "APIs para exercícios/api-go" && go test -v ./...
+
+      - name: Run integration tests
+        run: cd "APIs para exercícios/api-go" && go test -v -tags=integration ./...
+      
+      - name: Lint with golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: APIs para exercícios/api-go
+          version: latest
+
+  code-quality:
+    needs: build
+    uses: ./.github/workflows/code-scan.yml
+    with:
+      api_path: "APIs para exercícios/api-go"
+      language: "go"
+      sonar_project_key: "api-go"
+      sonar_organization: ${{ secrets.SONAR_ORGANIZATION }}
+    secrets: inherit
+
+  container:
+    needs: code-quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Docker Lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: APIs para exercícios/api-go/Dockerfile
+          ignore: DL3008,DL3009
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: APIs para exercícios/api-go
+          push: false
+          load: true
+          tags: api-go:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: api-go:${{ github.sha }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-api-go
+
+      - name: Login to DockerHub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to DockerHub
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/build-push-action@v4
+        with:
+          context: APIs para exercícios/api-go
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/api-go:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/api-go:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
