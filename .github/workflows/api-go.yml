@@ -31,7 +31,6 @@ jobs:
       - name: Lint with golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          working-directory: "APIs para exercícios/api-go"
           version: latest
 
   code-quality:
